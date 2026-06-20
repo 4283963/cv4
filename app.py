@@ -24,10 +24,23 @@ def calculate():
         if insulation_thickness <= 0:
             return jsonify({'error': '保温层厚度必须大于0'}), 400
 
+        use_2d = data.get('use_2d', False)
+        damage_angle = None
+        damage_width = 45.0
+        damage_factor = 5.0
+
+        if use_2d:
+            damage_angle = float(data.get('damage_angle', 90.0))
+            damage_width = float(data.get('damage_width', 45.0))
+            damage_factor = float(data.get('damage_factor', 5.0))
+
         result = calculate_temperature_distribution(
             inner_temp=inner_temp,
             insulation_thickness=insulation_thickness,
-            env_temp=env_temp
+            env_temp=env_temp,
+            damage_angle=damage_angle,
+            damage_width=damage_width,
+            damage_factor=damage_factor,
         )
 
         return jsonify(result)

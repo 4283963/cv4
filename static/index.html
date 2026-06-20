@@ -20,14 +20,14 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1280px;
             margin: 0 auto;
         }
 
         h1 {
             text-align: center;
             margin-bottom: 30px;
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -36,37 +36,51 @@
 
         .main-content {
             display: grid;
-            grid-template-columns: 350px 1fr;
-            gap: 30px;
+            grid-template-columns: 360px 1fr;
+            gap: 25px;
         }
 
         .control-panel {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             border-radius: 15px;
-            padding: 25px;
+            padding: 22px;
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
+        .section-title {
+            font-size: 1.05rem;
+            color: #4ecdc4;
+            margin-bottom: 12px;
+            margin-top: 18px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(78, 205, 196, 0.3);
+        }
+
+        .section-title:first-child {
+            margin-top: 0;
+        }
+
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 14px;
         }
 
         label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             font-weight: 500;
             color: #e0e0e0;
+            font-size: 14px;
         }
 
         input {
             width: 100%;
-            padding: 12px 15px;
+            padding: 10px 12px;
             border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 8px;
             background: rgba(255, 255, 255, 0.1);
             color: #fff;
-            font-size: 16px;
+            font-size: 14px;
             transition: all 0.3s ease;
         }
 
@@ -80,18 +94,56 @@
             color: rgba(255, 255, 255, 0.5);
         }
 
+        input[type="checkbox"] {
+            width: auto;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 10px;
+            background: rgba(78, 205, 196, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(78, 205, 196, 0.3);
+        }
+
+        .checkbox-label input {
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+        }
+
+        .checkbox-label span {
+            font-weight: 600;
+            color: #4ecdc4;
+        }
+
+        .damage-controls {
+            opacity: 0.5;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .damage-controls.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
         .btn {
             width: 100%;
-            padding: 14px;
+            padding: 13px;
             background: linear-gradient(90deg, #ff6b6b, #ee5a52);
             color: white;
             border: none;
             border-radius: 8px;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin-top: 10px;
+            margin-top: 18px;
         }
 
         .btn:hover {
@@ -113,7 +165,7 @@
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             border-radius: 15px;
-            padding: 25px;
+            padding: 22px;
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
@@ -121,10 +173,12 @@
             position: relative;
             width: 100%;
             margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
         }
 
         canvas {
-            width: 100%;
+            max-width: 100%;
             height: auto;
             display: block;
             border-radius: 10px;
@@ -133,9 +187,9 @@
 
         .color-bar {
             width: 100%;
-            height: 40px;
-            border-radius: 8px;
-            margin-bottom: 10px;
+            height: 28px;
+            border-radius: 6px;
+            margin-bottom: 8px;
             position: relative;
             background: linear-gradient(90deg, #0000ff, #00ffff, #00ff00, #ffff00, #ff0000);
         }
@@ -143,33 +197,33 @@
         .color-scale {
             display: flex;
             justify-content: space-between;
-            font-size: 14px;
+            font-size: 13px;
             color: #aaa;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
 
         .results {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-top: 20px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-top: 15px;
         }
 
         .result-card {
             background: rgba(255, 255, 255, 0.05);
-            padding: 15px;
+            padding: 12px;
             border-radius: 10px;
             text-align: center;
         }
 
         .result-label {
-            font-size: 14px;
+            font-size: 12px;
             color: #aaa;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
 
         .result-value {
-            font-size: 24px;
+            font-size: 18px;
             font-weight: 700;
             color: #4ecdc4;
         }
@@ -181,12 +235,13 @@
             background: rgba(255, 107, 107, 0.1);
             border-radius: 8px;
             display: none;
+            font-size: 14px;
         }
 
         .loading {
             display: none;
             text-align: center;
-            padding: 20px;
+            padding: 15px;
             color: #4ecdc4;
         }
 
@@ -194,10 +249,10 @@
             border: 3px solid rgba(78, 205, 196, 0.3);
             border-top: 3px solid #4ecdc4;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
+            margin: 0 auto 8px;
         }
 
         @keyframes spin {
@@ -205,9 +260,12 @@
             100% { transform: rotate(360deg); }
         }
 
-        @media (max-width: 900px) {
+        @media (max-width: 1000px) {
             .main-content {
                 grid-template-columns: 1fr;
+            }
+            .results {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
     </style>
@@ -218,21 +276,47 @@
 
         <div class="main-content">
             <div class="control-panel">
-                <h2 style="margin-bottom: 20px; font-size: 1.3rem;">参数设置</h2>
+                <div class="section-title">基本参数</div>
 
                 <div class="form-group">
                     <label for="innerTemp">管道内壁温度 (°C)</label>
-                    <input type="number" id="innerTemp" value="150" min="0" max="500" step="1" placeholder="请输入内壁温度">
+                    <input type="number" id="innerTemp" value="150" min="0" max="500" step="1">
                 </div>
 
                 <div class="form-group">
                     <label for="insulationThickness">保温层厚度 (m)</label>
-                    <input type="number" id="insulationThickness" value="0.05" min="0.01" max="0.5" step="0.01" placeholder="请输入保温层厚度">
+                    <input type="number" id="insulationThickness" value="0.05" min="0.01" max="0.5" step="0.01">
                 </div>
 
                 <div class="form-group">
                     <label for="envTemp">环境温度 (°C)</label>
-                    <input type="number" id="envTemp" value="25" min="-50" max="100" step="1" placeholder="请输入环境温度">
+                    <input type="number" id="envTemp" value="25" min="-50" max="100" step="1">
+                </div>
+
+                <div class="section-title">局部破损（二维模式）</div>
+
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="use2D">
+                        <span>启用二维局部破损模拟</span>
+                    </label>
+                </div>
+
+                <div class="damage-controls" id="damageControls">
+                    <div class="form-group">
+                        <label for="damageAngle">破损位置 (°) 0°=右侧，顺时针</label>
+                        <input type="number" id="damageAngle" value="90" min="0" max="360" step="1">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="damageWidth">破损宽度 (°)</label>
+                        <input type="number" id="damageWidth" value="45" min="5" max="180" step="5">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="damageFactor">破损程度 (倍数)</label>
+                        <input type="number" id="damageFactor" value="5" min="1.5" max="30" step="0.5">
+                    </div>
                 </div>
 
                 <button class="btn" id="simulateBtn">开始模拟</button>
@@ -246,20 +330,22 @@
             </div>
 
             <div class="visualization-panel">
-                <h2 style="margin-bottom: 20px; font-size: 1.3rem;">温度分布热力图</h2>
+                <h2 style="margin-bottom: 15px; font-size: 1.2rem;">温度分布热力图</h2>
 
                 <div class="canvas-container">
-                    <canvas id="heatmapCanvas" width="800" height="500"></canvas>
+                    <canvas id="heatmapCanvas" width="600" height="600"></canvas>
                 </div>
 
                 <div class="color-bar"></div>
                 <div class="color-scale">
                     <span id="minTempLabel">--°C</span>
+                    <span id="lowTempLabel">--°C</span>
                     <span id="midTempLabel">--°C</span>
+                    <span id="highTempLabel">--°C</span>
                     <span id="maxTempLabel">--°C</span>
                 </div>
 
-                <div class="results">
+                <div class="results" id="results1D">
                     <div class="result-card">
                         <div class="result-label">内壁温度</div>
                         <div class="result-value" id="resultInner">--°C</div>
@@ -269,8 +355,31 @@
                         <div class="result-value" id="resultOuter">--°C</div>
                     </div>
                     <div class="result-card">
-                        <div class="result-label">温度降</div>
+                        <div class="result-label">总温降</div>
                         <div class="result-value" id="resultDrop">--°C</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">热损失</div>
+                        <div class="result-value" id="resultFlux">-- W/m</div>
+                    </div>
+                </div>
+
+                <div class="results" id="results2D" style="display:none;">
+                    <div class="result-card">
+                        <div class="result-label">内壁温度</div>
+                        <div class="result-value" id="resultInner2D">--°C</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">外壁最高温</div>
+                        <div class="result-value" id="resultOuterMax">--°C</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">外壁最低温</div>
+                        <div class="result-value" id="resultOuterMin">--°C</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">周向温差</div>
+                        <div class="result-value" id="resultDiff">--°C</div>
                     </div>
                 </div>
             </div>
@@ -283,139 +392,217 @@
         const simulateBtn = document.getElementById('simulateBtn');
         const loading = document.getElementById('loading');
         const errorDiv = document.getElementById('error');
+        const use2DCheckbox = document.getElementById('use2D');
+        const damageControls = document.getElementById('damageControls');
 
-        function tempToColor(temp, minTemp, maxTemp) {
-            const ratio = (temp - minTemp) / (maxTemp - minTemp);
-            const clampedRatio = Math.max(0, Math.min(1, ratio));
-
-            if (clampedRatio < 0.25) {
-                const t = clampedRatio / 0.25;
-                return `rgb(0, ${Math.floor(255 * t)}, 255)`;
-            } else if (clampedRatio < 0.5) {
-                const t = (clampedRatio - 0.25) / 0.25;
-                return `rgb(0, 255, ${Math.floor(255 * (1 - t))})`;
-            } else if (clampedRatio < 0.75) {
-                const t = (clampedRatio - 0.5) / 0.25;
-                return `rgb(${Math.floor(255 * t)}, 255, 0)`;
+        use2DCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                damageControls.classList.add('active');
             } else {
-                const t = (clampedRatio - 0.75) / 0.25;
-                return `rgb(255, ${Math.floor(255 * (1 - t))}, 0)`;
+                damageControls.classList.remove('active');
+            }
+        });
+
+        function tempToRGB(temp, minTemp, maxTemp) {
+            const ratio = (temp - minTemp) / (maxTemp - minTemp);
+            const t = Math.max(0, Math.min(1, ratio));
+
+            if (t < 0.25) {
+                const x = t / 0.25;
+                return [0, Math.floor(255 * x), 255];
+            } else if (t < 0.5) {
+                const x = (t - 0.25) / 0.25;
+                return [0, 255, Math.floor(255 * (1 - x))];
+            } else if (t < 0.75) {
+                const x = (t - 0.5) / 0.25;
+                return [Math.floor(255 * x), 255, 0];
+            } else {
+                const x = (t - 0.75) / 0.25;
+                return [255, Math.floor(255 * (1 - x)), 0];
             }
         }
 
-        function drawHeatmap(result) {
+        function tempToColor(temp, minTemp, maxTemp) {
+            const [r, g, b] = tempToRGB(temp, minTemp, maxTemp);
+            return `rgb(${r},${g},${b})`;
+        }
+
+        function drawHeatmap1D(result) {
             const temperatures = result.temperatures;
             const radii = result.radii;
             const minTemp = result.min_temp;
             const maxTemp = result.max_temp;
-            const pipeInnerR = result.pipe_inner_radius;
-            const pipeOuterR = result.pipe_outer_radius;
-            const insulationOuterR = result.insulation_outer_radius;
+            const r1 = result.pipe_inner_radius;
+            const r2 = result.pipe_outer_radius;
+            const r3 = result.insulation_outer_radius;
+
+            const w = canvas.width;
+            const h = canvas.height;
+            const cx = w / 2;
+            const cy = h / 2;
+            const scale = Math.min(w, h) / (r3 * 2.6);
 
             ctx.fillStyle = '#0a0a1a';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillRect(0, 0, w, h);
 
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-            const maxR = insulationOuterR;
-            const scale = Math.min(canvas.width, canvas.height) / (maxR * 2.5);
-
-            const numLayers = temperatures.length;
-            for (let i = numLayers - 1; i >= 0; i--) {
+            const n = temperatures.length;
+            for (let i = n - 1; i >= 0; i--) {
                 const r = radii[i] * scale;
-                const temp = temperatures[i];
-                const color = tempToColor(temp, minTemp, maxTemp);
-
                 ctx.beginPath();
-                ctx.arc(centerX, centerY, r, 0, Math.PI * 2);
-                ctx.fillStyle = color;
+                ctx.arc(cx, cy, r, 0, Math.PI * 2);
+                ctx.fillStyle = tempToColor(temperatures[i], minTemp, maxTemp);
                 ctx.fill();
             }
 
             ctx.beginPath();
-            ctx.arc(centerX, centerY, pipeInnerR * scale, 0, Math.PI * 2);
+            ctx.arc(cx, cy, r1 * scale, 0, Math.PI * 2);
             ctx.fillStyle = '#1a1a2e';
             ctx.fill();
 
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-            ctx.lineWidth = 2;
-
+            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+            ctx.lineWidth = 1.5;
             ctx.beginPath();
-            ctx.arc(centerX, centerY, pipeInnerR * scale, 0, Math.PI * 2);
+            ctx.arc(cx, cy, r1 * scale, 0, Math.PI * 2);
             ctx.stroke();
-
             ctx.beginPath();
-            ctx.arc(centerX, centerY, pipeOuterR * scale, 0, Math.PI * 2);
+            ctx.arc(cx, cy, r2 * scale, 0, Math.PI * 2);
             ctx.stroke();
-
             ctx.beginPath();
-            ctx.arc(centerX, centerY, insulationOuterR * scale, 0, Math.PI * 2);
+            ctx.arc(cx, cy, r3 * scale, 0, Math.PI * 2);
             ctx.stroke();
 
             ctx.fillStyle = '#fff';
-            ctx.font = '14px Arial';
+            ctx.font = '13px Arial';
             ctx.textAlign = 'left';
+            const labelY = cy - r2 * scale - 20;
+            ctx.fillText('内壁', cx + r1 * scale + 8, labelY);
+            ctx.fillText('管壁', cx + (r1 + r2) / 2 * scale + 5, cy - 5);
+            ctx.fillText('保温层', cx + r2 * scale + 8, cy + 15);
 
-            ctx.fillText('内壁', centerX + pipeInnerR * scale + 10, centerY - pipeOuterR * scale - 30);
-            ctx.fillText('管壁', centerX + pipeOuterR * scale + 10, centerY - 10);
-            ctx.fillText('保温层', centerX + insulationOuterR * scale + 10, centerY + 20);
-
-            drawTemperatureCurve(centerX, centerY, temperatures, radii, minTemp, maxTemp, scale);
+            drawScaleBar(minTemp, maxTemp);
         }
 
-        function drawTemperatureCurve(centerX, centerY, temperatures, radii, minTemp, maxTemp, scale) {
-            const chartWidth = 250;
-            const chartHeight = 150;
-            const chartX = 20;
-            const chartY = 20;
+        function drawHeatmap2D(result) {
+            const T = result.temperatures_2d;
+            const r = result.radii;
+            const thetaDeg = result.thetas;
+            const minTemp = result.min_temp;
+            const maxTemp = result.max_temp;
+            const r1 = result.pipe_inner_radius;
+            const r2 = result.pipe_outer_radius;
+            const r3 = result.insulation_outer_radius;
+            const nr = r.length;
+            const nth = thetaDeg.length;
 
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-            ctx.fillRect(chartX, chartY, chartWidth, chartHeight);
+            const w = canvas.width;
+            const h = canvas.height;
+            const cx = w / 2;
+            const cy = h / 2;
+            const scale = Math.min(w, h) / (r3 * 2.6);
 
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-            ctx.lineWidth = 1;
-            ctx.strokeRect(chartX, chartY, chartWidth, chartHeight);
+            ctx.fillStyle = '#0a0a1a';
+            ctx.fillRect(0, 0, w, h);
 
-            ctx.beginPath();
-            const numPoints = temperatures.length;
-            for (let i = 0; i < numPoints; i++) {
-                const x = chartX + (i / (numPoints - 1)) * chartWidth;
-                const y = chartY + chartHeight - ((temperatures[i] - minTemp) / (maxTemp - minTemp)) * chartHeight;
+            for (let i = nr - 1; i >= 1; i--) {
+                const r_inner = r[i - 1] * scale;
+                const r_outer = r[i] * scale;
 
-                if (i === 0) {
-                    ctx.moveTo(x, y);
-                } else {
-                    ctx.lineTo(x, y);
+                for (let j = 0; j < nth; j++) {
+                    const j_next = (j + 1) % nth;
+                    let th0 = thetaDeg[j] * Math.PI / 180;
+                    let th1 = thetaDeg[j_next] * Math.PI / 180;
+
+                    if (j === nth - 1) {
+                        th1 = 2 * Math.PI;
+                    }
+
+                    const temp = T[i][j];
+                    ctx.beginPath();
+                    ctx.moveTo(cx + r_inner * Math.cos(th0), cy + r_inner * Math.sin(th0));
+                    ctx.arc(cx, cy, r_outer, th0, th1);
+                    ctx.arc(cx, cy, r_inner, th1, th0, true);
+                    ctx.closePath();
+                    ctx.fillStyle = tempToColor(temp, minTemp, maxTemp);
+                    ctx.fill();
                 }
             }
-            ctx.strokeStyle = '#4ecdc4';
-            ctx.lineWidth = 2;
+
+            ctx.beginPath();
+            ctx.arc(cx, cy, r1 * scale, 0, Math.PI * 2);
+            ctx.fillStyle = '#1a1a2e';
+            ctx.fill();
+
+            ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+            ctx.lineWidth = 1.5;
+
+            ctx.beginPath();
+            ctx.arc(cx, cy, r1 * scale, 0, Math.PI * 2);
             ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(cx, cy, r2 * scale, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(cx, cy, r3 * scale, 0, Math.PI * 2);
+            ctx.stroke();
+
+            const dmgAngle = result.damage_angle || 0;
+            const dmgWidth = result.damage_width || 0;
+            const dmgRad = dmgAngle * Math.PI / 180;
+            const dmgHalf = dmgWidth / 2 * Math.PI / 180;
+            const r_mid = (r2 + r3) / 2 * scale;
+
+            ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+            ctx.setLineDash([5, 4]);
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.arc(cx, cy, r3 * scale + 8, dmgRad - dmgHalf, dmgRad + dmgHalf);
+            ctx.stroke();
+            ctx.setLineDash([]);
 
             ctx.fillStyle = '#fff';
             ctx.font = '12px Arial';
             ctx.textAlign = 'left';
-            ctx.fillText('温度分布曲线', chartX + 5, chartY + 15);
+            ctx.fillText('破损区', cx + (r3 * scale + 14) * Math.cos(dmgRad), cy + (r3 * scale + 14) * Math.sin(dmgRad) + 4);
 
-            ctx.fillStyle = '#aaa';
-            ctx.font = '10px Arial';
-            ctx.fillText(maxTemp.toFixed(1) + '°C', chartX + chartWidth + 5, chartY + 5);
-            ctx.fillText(minTemp.toFixed(1) + '°C', chartX + chartWidth + 5, chartY + chartHeight);
+            drawScaleBar(minTemp, maxTemp);
+        }
+
+        function drawScaleBar(minTemp, maxTemp) {
+            document.getElementById('minTempLabel').textContent = minTemp.toFixed(0) + '°C';
+            document.getElementById('lowTempLabel').textContent = (minTemp + (maxTemp - minTemp) * 0.25).toFixed(0) + '°C';
+            document.getElementById('midTempLabel').textContent = ((minTemp + maxTemp) / 2).toFixed(0) + '°C';
+            document.getElementById('highTempLabel').textContent = (minTemp + (maxTemp - minTemp) * 0.75).toFixed(0) + '°C';
+            document.getElementById('maxTempLabel').textContent = maxTemp.toFixed(0) + '°C';
         }
 
         async function runSimulation() {
             const innerTemp = parseFloat(document.getElementById('innerTemp').value);
             const insulationThickness = parseFloat(document.getElementById('insulationThickness').value);
             const envTemp = parseFloat(document.getElementById('envTemp').value);
+            const use2D = use2DCheckbox.checked;
 
             if (isNaN(innerTemp) || isNaN(insulationThickness) || isNaN(envTemp)) {
-                showError('请填写所有参数');
+                showError('请填写所有基本参数');
                 return;
             }
-
             if (insulationThickness <= 0) {
                 showError('保温层厚度必须大于0');
                 return;
+            }
+
+            const payload = {
+                inner_temp: innerTemp,
+                insulation_thickness: insulationThickness,
+                env_temp: envTemp,
+                use_2d: use2D
+            };
+
+            if (use2D) {
+                payload.damage_angle = parseFloat(document.getElementById('damageAngle').value);
+                payload.damage_width = parseFloat(document.getElementById('damageWidth').value);
+                payload.damage_factor = parseFloat(document.getElementById('damageFactor').value);
             }
 
             hideError();
@@ -425,21 +612,24 @@
             try {
                 const response = await fetch('/api/calculate', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        inner_temp: innerTemp,
-                        insulation_thickness: insulationThickness,
-                        env_temp: envTemp
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
                 });
 
                 const result = await response.json();
 
                 if (response.ok) {
-                    drawHeatmap(result);
-                    updateResultDisplay(result);
+                    if (result.mode === '2D') {
+                        drawHeatmap2D(result);
+                        updateResults2D(result);
+                        document.getElementById('results1D').style.display = 'none';
+                        document.getElementById('results2D').style.display = 'grid';
+                    } else {
+                        drawHeatmap1D(result);
+                        updateResults1D(result);
+                        document.getElementById('results1D').style.display = 'grid';
+                        document.getElementById('results2D').style.display = 'none';
+                    }
                 } else {
                     showError(result.error || '计算失败');
                 }
@@ -451,14 +641,18 @@
             }
         }
 
-        function updateResultDisplay(result) {
-            document.getElementById('minTempLabel').textContent = result.min_temp.toFixed(1) + '°C';
-            document.getElementById('midTempLabel').textContent = ((result.min_temp + result.max_temp) / 2).toFixed(1) + '°C';
-            document.getElementById('maxTempLabel').textContent = result.max_temp.toFixed(1) + '°C';
-
+        function updateResults1D(result) {
             document.getElementById('resultInner').textContent = result.max_temp.toFixed(1) + '°C';
             document.getElementById('resultOuter').textContent = result.outer_surface_temp.toFixed(1) + '°C';
             document.getElementById('resultDrop').textContent = (result.max_temp - result.outer_surface_temp).toFixed(1) + '°C';
+            document.getElementById('resultFlux').textContent = result.heat_flux_per_length.toFixed(1) + ' W/m';
+        }
+
+        function updateResults2D(result) {
+            document.getElementById('resultInner2D').textContent = result.max_temp.toFixed(1) + '°C';
+            document.getElementById('resultOuterMax').textContent = result.outer_surface_temp_max.toFixed(1) + '°C';
+            document.getElementById('resultOuterMin').textContent = result.outer_surface_temp_min.toFixed(1) + '°C';
+            document.getElementById('resultDiff').textContent = (result.outer_surface_temp_max - result.outer_surface_temp_min).toFixed(1) + '°C';
         }
 
         function showError(message) {

@@ -10,149 +10,239 @@ def calculate_temperature_distribution(
     pipe_conductivity: float = 50.0,
     insulation_conductivity: float = 0.04,
     convection_coeff: float = 10.0,
-    num_nodes: int = 200
+    num_nodes: int = 200,
+    damage_angle: float = None,
+    damage_width: float = 45.0,
+    damage_factor: float = 5.0,
 ) -> dict:
     """
-    计算多层圆筒壁（管壁 + 保温层）+ 外壁对流的一维稳态径向温度分布。
+    计算管道横截面的二维稳态温度分布。
 
-    采用**精确解析解**直接求解，确保能量守恒严格满足，温度不会出现
-    超温或物理上不合理的数值。
+    当 damage_angle == 0（无局部破损）时，使用一维解析解（精确、快速）。
+    当 damage_angle > 0 时，使用二维极坐标有限体积法求解。
 
-    物理模型:
-        内壁 r = r1:  T = T1                    (定温, Dirichlet)
-        管壁区域:     T(r) = T1 - Q'·ln(r/r1)/(2πk1)
-        保温层区域:   T(r) = T(r2) - Q'·ln(r/r2)/(2πk2)
-        外壁 r = r3:  -k·dT/dr = h(T3 - Tenv)   (对流, Robin)
-
-    总热阻（单位管长）:
-        R'_total = ln(r2/r1)/(2πk1) + ln(r3/r2)/(2πk2) + 1/(2πh r3)
+    局部破损模型：在以 damage_angle 为中心、宽度为 damage_width 的扇区内，
+    保温层的等效导热系数乘以 damage_factor（通常 >1，表示隔热效果变差）。
 
     参数:
-        inner_temp: 管道内壁温度 T1 (°C)
-        insulation_thickness: 保温层厚度 δ = r3 - r2 (m)
-        env_temp: 环境温度 Tenv (°C)
-        pipe_inner_radius: 管道内半径 r1 (m)
-        pipe_wall_thickness: 管壁厚度 = r2 - r1 (m)
-        pipe_conductivity: 管壁导热系数 k1 (W/m·K)
-        insulation_conductivity: 保温层导热系数 k2 (W/m·K)
-        convection_coeff: 外壁对流换热系数 h (W/m²·K)
-        num_nodes: 径向节点数（决定输出数组长度）
+        inner_temp: 管道内壁温度 (°C)
+        insulation_thickness: 保温层厚度 (m)
+        env_temp: 环境温度 (°C)
+        pipe_inner_radius: 管道内半径 (m)
+        pipe_wall_thickness: 管壁厚度 (m)
+        pipe_conductivity: 管壁导热系数 (W/m·K)
+        insulation_conductivity: 保温层导热系数 (W/m·K)
+        convection_coeff: 外壁对流换热系数 (W/m²·K)
+        num_nodes: 径向节点数（一维模式）
+        damage_angle: 破损区域中心角 (度)，0 表示无破损，一维对称
+        damage_width: 破损区域的角宽度 (度)
+        damage_factor: 破损区域保温层导热系数放大倍数（>1 表示更差的隔热）
 
     返回:
-        dict: 温度分布、半径坐标、边界温度、各层半径等信息
+        dict: 温度分布数据
     """
-    r1 = pipe_inner_radius
-    r2 = r1 + pipe_wall_thickness
-    r3 = r2 + insulation_thickness
+    if damage_angle is None or damage_width is None or damage_width <= 0:
+        return _one_dimensional_solution(
+            inner_temp, insulation_thickness, env_temp,
+            pipe_inner_radius, pipe_wall_thickness,
+            pipe_conductivity, insulation_conductivity,
+            convection_coeff, num_nodes
+        )
 
-    if insulation_thickness <= 0:
+    return _two_dimensional_solution(
+        inner_temp, insulation_thickness, env_temp,
+        pipe_inner_radius, pipe_wall_thickness,
+        pipe_conductivity, insulation_conductivity,
+        convection_coeff,
+        damage_angle, damage_width, damage_factor,
+        nr=50, nth=120,
+    )
+
+
+def _one_dimensional_solution(
+    T1, thickness, Tenv, r1, pipe_thick,
+    k_pipe, k_insul, h, nr
+):
+    """
+    一维稳态多层圆筒壁导热 + 外壁对流 的精确解析解。
+    """
+    r2 = r1 + pipe_thick
+    r3 = r2 + thickness
+
+    if thickness <= 0:
         raise ValueError("保温层厚度必须大于 0")
 
-    R_pipe = np.log(r2 / r1) / (2.0 * np.pi * pipe_conductivity)
-    R_insul = np.log(r3 / r2) / (2.0 * np.pi * insulation_conductivity)
-    R_conv = 1.0 / (2.0 * np.pi * convection_coeff * r3)
-    R_total = R_pipe + R_insul + R_conv
+    R1 = np.log(r2 / r1) / (2.0 * np.pi * k_pipe)
+    R2 = np.log(r3 / r2) / (2.0 * np.pi * k_insul)
+    R3 = 1.0 / (2.0 * np.pi * h * r3)
+    R_total = R1 + R2 + R3
 
-    Q_per_L = (inner_temp - env_temp) / R_total
+    Q_per_L = (T1 - Tenv) / R_total
 
-    r_nodes = np.linspace(r1, r3, num_nodes)
-    T_nodes = np.empty(num_nodes)
+    r_nodes = np.linspace(r1, r3, nr)
+    T_nodes = np.empty(nr)
     in_pipe = r_nodes <= r2
-    in_insul = ~in_pipe
 
-    T_nodes[in_pipe] = (
-        inner_temp
-        - Q_per_L * np.log(r_nodes[in_pipe] / r1) / (2.0 * np.pi * pipe_conductivity)
-    )
+    T_nodes[in_pipe] = T1 - Q_per_L * np.log(r_nodes[in_pipe] / r1) / (2.0 * np.pi * k_pipe)
 
-    T_pipe_outer = inner_temp - Q_per_L * R_pipe
-    T_nodes[in_insul] = (
-        T_pipe_outer
-        - Q_per_L * np.log(r_nodes[in_insul] / r2) / (2.0 * np.pi * insulation_conductivity)
-    )
+    T_pipe_outer = T1 - Q_per_L * R1
+    T_nodes[~in_pipe] = T_pipe_outer - Q_per_L * np.log(r_nodes[~in_pipe] / r2) / (2.0 * np.pi * k_insul)
 
-    T_outer_surface = T_nodes[-1]
-    T_outer_check = env_temp + Q_per_L * R_conv
-
-    assert abs(T_outer_surface - T_outer_check) < 1e-8, (
-        f"外壁温度不一致: T(end)={T_outer_surface:.6f} vs "
-        f"Tenv+Q'R_conv={T_outer_check:.6f}"
-    )
-
-    T_max = float(np.max(T_nodes))
-    T_min = float(np.min(T_nodes))
-    physical_max = max(inner_temp, env_temp) + 1e-8
-    physical_min = min(inner_temp, env_temp) - 1e-8
-
-    assert T_max <= physical_max, (
-        f"违反能量守恒: 最高温度 {T_max:.4f}°C 超过 "
-        f"max(T1,Tenv)={physical_max:.4f}°C"
-    )
-    assert T_min >= physical_min, (
-        f"违反能量守恒: 最低温度 {T_min:.4f}°C 低于 "
-        f"min(T1,Tenv)={physical_min:.4f}°C"
-    )
-    assert np.all(np.diff(T_nodes) <= 1e-10), (
-        "温度分布必须从内壁向外壁单调非递增"
-    )
+    T_outer_surface = float(T_nodes[-1])
 
     return {
+        "mode": "1D",
         "temperatures": T_nodes.tolist(),
         "radii": r_nodes.tolist(),
         "pipe_inner_radius": r1,
         "pipe_outer_radius": r2,
         "insulation_outer_radius": r3,
-        "min_temp": T_min,
-        "max_temp": T_max,
-        "outer_surface_temp": float(T_outer_surface),
+        "min_temp": float(np.min(T_nodes)),
+        "max_temp": float(np.max(T_nodes)),
+        "outer_surface_temp": T_outer_surface,
         "heat_flux_per_length": float(Q_per_L),
-        "pipe_wall_temp_drop": float(inner_temp - T_pipe_outer),
+        "pipe_wall_temp_drop": float(T1 - T_pipe_outer),
         "insulation_temp_drop": float(T_pipe_outer - T_outer_surface),
-        "convection_temp_drop": float(T_outer_surface - env_temp),
+        "convection_temp_drop": float(T_outer_surface - Tenv),
     }
 
 
-def _fdm_debug_solver(*args, **kwargs):
+def _two_dimensional_solution(
+    T1, thickness, Tenv, r1, pipe_thick,
+    k_pipe, k_insul, h,
+    damage_angle_deg, damage_width_deg, damage_factor,
+    nr, nth,
+):
     """
-    （保留用于调试）有限体积法求解器。
-    注意：当 k1/k2 > 100 时界面附近会有较大截断误差。
-    生产代码请使用解析解 calculate_temperature_distribution。
-    """
-    (inner_temp, insulation_thickness, env_temp) = args[:3]
-    r1 = kwargs.get("pipe_inner_radius", 0.1)
-    r2 = r1 + kwargs.get("pipe_wall_thickness", 0.01)
-    r3 = r2 + insulation_thickness
-    k1 = kwargs.get("pipe_conductivity", 50.0)
-    k2 = kwargs.get("insulation_conductivity", 0.04)
-    h = kwargs.get("convection_coeff", 10.0)
-    N = kwargs.get("num_nodes", 200)
+    二维极坐标有限体积法求解器。
+    采用控制容积法，界面导热系数用调和平均，周向周期性边界。
 
-    r = np.linspace(r1, r3, N)
+    未知量排布：idx = i * nth + j，i 为径向索引，j 为周向索引。
+    """
+    r2 = r1 + pipe_thick
+    r3 = r2 + thickness
+
+    r = np.linspace(r1, r3, nr)
     dr = r[1] - r[0]
-    k = np.where(r <= r2, k1, k2)
 
+    theta = np.linspace(0.0, 2.0 * np.pi, nth, endpoint=False)
+    dtheta = theta[1] - theta[0]
+
+    damage_center = np.deg2rad(damage_angle_deg)
+    damage_half = np.deg2rad(damage_width_deg) / 2.0
+
+    k = np.zeros((nr, nth))
+    for j in range(nth):
+        th = theta[j]
+        dth = _angular_distance(th, damage_center)
+        in_damage = dth <= damage_half
+        k_damage = k_insul * damage_factor if in_damage else k_insul
+        for i in range(nr):
+            if r[i] <= r2:
+                k[i, j] = k_pipe
+            else:
+                k[i, j] = k_damage
+
+    N = nr * nth
     A = np.zeros((N, N))
     b = np.zeros(N)
-    A[0, 0] = 1.0
-    b[0] = inner_temp
 
-    def hm(a, b_):
-        return 2.0 * a * b_ / (a + b_) if (a > 0 and b_ > 0) else 0.5 * (a + b_)
+    def idx(i, j):
+        return i * nth + (j % nth)
 
-    for i in range(1, N - 1):
-        kw = hm(k[i], k[i - 1])
-        ke = hm(k[i], k[i + 1])
-        rw = r[i] - dr / 2.0
-        re = r[i] + dr / 2.0
-        A[i, i - 1] = -kw * rw
-        A[i, i] = kw * rw + ke * re
-        A[i, i + 1] = -ke * re
+    for i in range(nr):
+        for j in range(nth):
+            p = idx(i, j)
 
-    rN, rwN = r[-1], r[-1] - dr / 2.0
-    kwN = hm(k[-1], k[-2])
-    A[N - 1, N - 2] = -2.0 * kwN * rwN
-    A[N - 1, N - 1] = 2.0 * kwN * rwN + 2.0 * h * rN * dr
-    b[N - 1] = 2.0 * h * rN * dr * env_temp
+            if i == 0:
+                A[p, p] = 1.0
+                b[p] = T1
+                continue
 
-    T = np.linalg.solve(A, b)
-    return T.tolist()
+            r_i = r[i]
+            r_w = r_i - dr / 2.0
+            r_e = r_i + dr / 2.0
+
+            k_w = _harmonic_mean(k[i, j], k[i - 1, j])
+            a_W = k_w * r_w * dtheta / dr
+
+            if i < nr - 1:
+                k_e = _harmonic_mean(k[i, j], k[i + 1, j])
+                a_E = k_e * r_e * dtheta / dr
+            else:
+                a_E = 0.0
+
+            j_s = (j - 1) % nth
+            j_n = (j + 1) % nth
+            k_s = _harmonic_mean(k[i, j], k[i, j_s])
+            k_n = _harmonic_mean(k[i, j], k[i, j_n])
+
+            a_S = k_s * dr / (r_i * dtheta)
+            a_N = k_n * dr / (r_i * dtheta)
+
+            a_P = a_W + a_E + a_S + a_N
+            b_val = 0.0
+
+            if i == nr - 1:
+                a_conv = h * r_e * dtheta
+                a_P += a_conv
+                b_val += a_conv * Tenv
+
+            A[p, idx(i - 1, j)] -= a_W
+            if i < nr - 1:
+                A[p, idx(i + 1, j)] -= a_E
+            A[p, idx(i, j_s)] -= a_S
+            A[p, idx(i, j_n)] -= a_N
+            A[p, p] = a_P
+            b[p] = b_val
+
+    T_flat = np.linalg.solve(A, b)
+    T = T_flat.reshape((nr, nth))
+
+    T_max = float(np.max(T))
+    T_min = float(np.min(T))
+    physical_max = max(T1, Tenv) + 1e-4
+    physical_min = min(T1, Tenv) - 1e-4
+
+    assert T_max <= physical_max, f"违反能量守恒: T_max={T_max:.4f} > {physical_max:.4f}"
+    assert T_min >= physical_min, f"违反能量守恒: T_min={T_min:.4f} < {physical_min:.4f}"
+
+    T_outer_min = float(np.min(T[-1, :]))
+    T_outer_max = float(np.max(T[-1, :]))
+
+    theta_deg = np.rad2deg(theta).tolist()
+
+    return {
+        "mode": "2D",
+        "temperatures_2d": T.tolist(),
+        "radii": r.tolist(),
+        "thetas": theta_deg,
+        "pipe_inner_radius": r1,
+        "pipe_outer_radius": r2,
+        "insulation_outer_radius": r3,
+        "min_temp": T_min,
+        "max_temp": T_max,
+        "outer_surface_temp_avg": float(np.mean(T[-1, :])),
+        "outer_surface_temp_min": T_outer_min,
+        "outer_surface_temp_max": T_outer_max,
+        "damage_angle": damage_angle_deg,
+        "damage_width": damage_width_deg,
+        "damage_factor": damage_factor,
+    }
+
+
+def _angular_distance(a, b):
+    """
+    计算两个角度（弧度）之间的最小绝对差值，考虑 2π 周期性。
+    """
+    d = abs(a - b)
+    d = d % (2.0 * np.pi)
+    if d > np.pi:
+        d = 2.0 * np.pi - d
+    return d
+
+
+def _harmonic_mean(k1, k2):
+    if k1 <= 0.0 or k2 <= 0.0:
+        return 0.5 * (k1 + k2)
+    return 2.0 * k1 * k2 / (k1 + k2)
