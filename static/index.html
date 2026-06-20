@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>热力管道温度分布模拟系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 30px;
+        }
+
+        .control-panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #e0e0e0;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #4ecdc4;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(90deg, #ff6b6b, #ee5a52);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .visualization-panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        canvas {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 10px;
+            background: #0a0a1a;
+        }
+
+        .color-bar {
+            width: 100%;
+            height: 40px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            position: relative;
+            background: linear-gradient(90deg, #0000ff, #00ffff, #00ff00, #ffff00, #ff0000);
+        }
+
+        .color-scale {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 20px;
+        }
+
+        .results {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .result-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .result-label {
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+
+        .result-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #4ecdc4;
+        }
+
+        .error {
+            color: #ff6b6b;
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(255, 107, 107, 0.1);
+            border-radius: 8px;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #4ecdc4;
+        }
+
+        .spinner {
+            border: 3px solid rgba(78, 205, 196, 0.3);
+            border-top: 3px solid #4ecdc4;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>热力管道温度分布模拟系统</h1>
+
+        <div class="main-content">
+            <div class="control-panel">
+                <h2 style="margin-bottom: 20px; font-size: 1.3rem;">参数设置</h2>
+
+                <div class="form-group">
+                    <label for="innerTemp">管道内壁温度 (°C)</label>
+                    <input type="number" id="innerTemp" value="150" min="0" max="500" step="1" placeholder="请输入内壁温度">
+                </div>
+
+                <div class="form-group">
+                    <label for="insulationThickness">保温层厚度 (m)</label>
+                    <input type="number" id="insulationThickness" value="0.05" min="0.01" max="0.5" step="0.01" placeholder="请输入保温层厚度">
+                </div>
+
+                <div class="form-group">
+                    <label for="envTemp">环境温度 (°C)</label>
+                    <input type="number" id="envTemp" value="25" min="-50" max="100" step="1" placeholder="请输入环境温度">
+                </div>
+
+                <button class="btn" id="simulateBtn">开始模拟</button>
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    计算中...
+                </div>
+
+                <div class="error" id="error"></div>
+            </div>
+
+            <div class="visualization-panel">
+                <h2 style="margin-bottom: 20px; font-size: 1.3rem;">温度分布热力图</h2>
+
+                <div class="canvas-container">
+                    <canvas id="heatmapCanvas" width="800" height="500"></canvas>
+                </div>
+
+                <div class="color-bar"></div>
+                <div class="color-scale">
+                    <span id="minTempLabel">--°C</span>
+                    <span id="midTempLabel">--°C</span>
+                    <span id="maxTempLabel">--°C</span>
+                </div>
+
+                <div class="results">
+                    <div class="result-card">
+                        <div class="result-label">内壁温度</div>
+                        <div class="result-value" id="resultInner">--°C</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">外壁温度</div>
+                        <div class="result-value" id="resultOuter">--°C</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">温度降</div>
+                        <div class="result-value" id="resultDrop">--°C</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('heatmapCanvas');
+        const ctx = canvas.getContext('2d');
+        const simulateBtn = document.getElementById('simulateBtn');
+        const loading = document.getElementById('loading');
+        const errorDiv = document.getElementById('error');
+
+        function tempToColor(temp, minTemp, maxTemp) {
+            const ratio = (temp - minTemp) / (maxTemp - minTemp);
+            const clampedRatio = Math.max(0, Math.min(1, ratio));
+
+            if (clampedRatio < 0.25) {
+                const t = clampedRatio / 0.25;
+                return `rgb(0, ${Math.floor(255 * t)}, 255)`;
+            } else if (clampedRatio < 0.5) {
+                const t = (clampedRatio - 0.25) / 0.25;
+                return `rgb(0, 255, ${Math.floor(255 * (1 - t))})`;
+            } else if (clampedRatio < 0.75) {
+                const t = (clampedRatio - 0.5) / 0.25;
+                return `rgb(${Math.floor(255 * t)}, 255, 0)`;
+            } else {
+                const t = (clampedRatio - 0.75) / 0.25;
+                return `rgb(255, ${Math.floor(255 * (1 - t))}, 0)`;
+            }
+        }
+
+        function drawHeatmap(result) {
+            const temperatures = result.temperatures;
+            const radii = result.radii;
+            const minTemp = result.min_temp;
+            const maxTemp = result.max_temp;
+            const pipeInnerR = result.pipe_inner_radius;
+            const pipeOuterR = result.pipe_outer_radius;
+            const insulationOuterR = result.insulation_outer_radius;
+
+            ctx.fillStyle = '#0a0a1a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const maxR = insulationOuterR;
+            const scale = Math.min(canvas.width, canvas.height) / (maxR * 2.5);
+
+            const numLayers = temperatures.length;
+            for (let i = numLayers - 1; i >= 0; i--) {
+                const r = radii[i] * scale;
+                const temp = temperatures[i];
+                const color = tempToColor(temp, minTemp, maxTemp);
+
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, r, 0, Math.PI * 2);
+                ctx.fillStyle = color;
+                ctx.fill();
+            }
+
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, pipeInnerR * scale, 0, Math.PI * 2);
+            ctx.fillStyle = '#1a1a2e';
+            ctx.fill();
+
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.lineWidth = 2;
+
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, pipeInnerR * scale, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, pipeOuterR * scale, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, insulationOuterR * scale, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.fillStyle = '#fff';
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'left';
+
+            ctx.fillText('内壁', centerX + pipeInnerR * scale + 10, centerY - pipeOuterR * scale - 30);
+            ctx.fillText('管壁', centerX + pipeOuterR * scale + 10, centerY - 10);
+            ctx.fillText('保温层', centerX + insulationOuterR * scale + 10, centerY + 20);
+
+            drawTemperatureCurve(centerX, centerY, temperatures, radii, minTemp, maxTemp, scale);
+        }
+
+        function drawTemperatureCurve(centerX, centerY, temperatures, radii, minTemp, maxTemp, scale) {
+            const chartWidth = 250;
+            const chartHeight = 150;
+            const chartX = 20;
+            const chartY = 20;
+
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.fillRect(chartX, chartY, chartWidth, chartHeight);
+
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(chartX, chartY, chartWidth, chartHeight);
+
+            ctx.beginPath();
+            const numPoints = temperatures.length;
+            for (let i = 0; i < numPoints; i++) {
+                const x = chartX + (i / (numPoints - 1)) * chartWidth;
+                const y = chartY + chartHeight - ((temperatures[i] - minTemp) / (maxTemp - minTemp)) * chartHeight;
+
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.strokeStyle = '#4ecdc4';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.fillStyle = '#fff';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('温度分布曲线', chartX + 5, chartY + 15);
+
+            ctx.fillStyle = '#aaa';
+            ctx.font = '10px Arial';
+            ctx.fillText(maxTemp.toFixed(1) + '°C', chartX + chartWidth + 5, chartY + 5);
+            ctx.fillText(minTemp.toFixed(1) + '°C', chartX + chartWidth + 5, chartY + chartHeight);
+        }
+
+        async function runSimulation() {
+            const innerTemp = parseFloat(document.getElementById('innerTemp').value);
+            const insulationThickness = parseFloat(document.getElementById('insulationThickness').value);
+            const envTemp = parseFloat(document.getElementById('envTemp').value);
+
+            if (isNaN(innerTemp) || isNaN(insulationThickness) || isNaN(envTemp)) {
+                showError('请填写所有参数');
+                return;
+            }
+
+            if (insulationThickness <= 0) {
+                showError('保温层厚度必须大于0');
+                return;
+            }
+
+            hideError();
+            loading.style.display = 'block';
+            simulateBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/calculate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        inner_temp: innerTemp,
+                        insulation_thickness: insulationThickness,
+                        env_temp: envTemp
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    drawHeatmap(result);
+                    updateResultDisplay(result);
+                } else {
+                    showError(result.error || '计算失败');
+                }
+            } catch (err) {
+                showError('网络错误: ' + err.message);
+            } finally {
+                loading.style.display = 'none';
+                simulateBtn.disabled = false;
+            }
+        }
+
+        function updateResultDisplay(result) {
+            document.getElementById('minTempLabel').textContent = result.min_temp.toFixed(1) + '°C';
+            document.getElementById('midTempLabel').textContent = ((result.min_temp + result.max_temp) / 2).toFixed(1) + '°C';
+            document.getElementById('maxTempLabel').textContent = result.max_temp.toFixed(1) + '°C';
+
+            document.getElementById('resultInner').textContent = result.max_temp.toFixed(1) + '°C';
+            document.getElementById('resultOuter').textContent = result.outer_surface_temp.toFixed(1) + '°C';
+            document.getElementById('resultDrop').textContent = (result.max_temp - result.outer_surface_temp).toFixed(1) + '°C';
+        }
+
+        function showError(message) {
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function hideError() {
+            errorDiv.style.display = 'none';
+        }
+
+        simulateBtn.addEventListener('click', runSimulation);
+
+        window.addEventListener('load', () => {
+            runSimulation();
+        });
+    </script>
+</body>
+</html>
